@@ -9,7 +9,7 @@ services:
       MYSQL_HOST: db
       MYSQL_PASSWORD: db-57xsl
     ports:
-      - "3306:3307"
+      - "3307:3307"
     volumes:
       - db_data:/var/lib/mysql
     networks:
@@ -26,7 +26,7 @@ services:
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: db-57xsl
     ports:
-      - "8080:8080"
+      - "8082:8082"
     volumes:
       - ./backend/src/main/resources/application.properties:/backend/src/main/resources/application.properties
     networks:

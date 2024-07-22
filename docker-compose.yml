@@ -9,7 +9,7 @@ services:
       MYSQL_HOST: db
       MYSQL_PASSWORD: db-57xsl
     ports:
-      - "3307:3307"
+      - "3306:3307"
     volumes:
       - db_data:/var/lib/mysql
     networks:

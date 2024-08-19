@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: module3yan-app
+  namespace: default
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: module3yan
+  template:
+    metadata:
+      labels:
+        app: module3yan
+    spec:
+      containers:
+      - name: db
+        image: public.ecr.aws/j8p9i7s1/module3yan:db-48
+      - name: back
+        image: public.ecr.aws/j8p9i7s1/module3yan:back-48
+      - name: front
+        image: public.ecr.aws/j8p9i7s1/module3yan:front-48

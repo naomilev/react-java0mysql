@@ -1,39 +1,119 @@
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: module3yan-app
-  namespace: default
+  name: mysql
+spec:
+  replicas: 1  # Usually 1 for databases
+  selector:
+    matchLabels:
+      app: mysql
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      containers:
+      - name: mysql
+        image: mysql:8.0.27
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          value: db-57xsl
+        - name: MYSQL_DATABASE
+          value: example
+        - name: MYSQL_HOST
+          value: db
+        - name: MYSQL_PASSWORD
+          value: db-57xsl
+        ports:
+        - containerPort: 3306
+        volumeMounts:
+        - name: mysql-data
+          mountPath: /var/lib/mysql
+      volumes:
+      - name: mysql-data
+        emptyDir: {}  # For simplicity; use PersistentVolume in production
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
 spec:
   replicas: 4
   selector:
     matchLabels:
-      app: module3yan
+      app: backend
   template:
     metadata:
       labels:
-        app: module3yan
+        app: backend
     spec:
       containers:
-      - name: db
-        image: public.ecr.aws/j8p9i7s1/module3yan:db-48
-        ports:
-        - containerPort: 3307
-        env:
-        - name: MYSQL_ROOT_PASSWORD
-          value: "db-57xsl"
-        readinessProbe:
-          tcpSocket:
-            port: 3307
-          initialDelaySeconds: 30
-          periodSeconds: 10
-      - name: back
-        image: public.ecr.aws/j8p9i7s1/module3yan:back-48
+      - name: backend
+        image: backend:latest  # Ensure this matches your actual image name
         env:
         - name: SPRING_DATASOURCE_URL
-          value: "jdbc:mysql://localhost:3307/example"
+          value: jdbc:mysql://mysql:3306/example
         - name: SPRING_DATASOURCE_USERNAME
-          value: "root"
+          value: root
         - name: SPRING_DATASOURCE_PASSWORD
-          value: "db-57xsl"
-      - name: front
-        image: public.ecr.aws/j8p9i7s1/module3yan:front-48
+          value: db-57xsl
+        ports:
+        - containerPort: 8082
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+spec:
+  replicas: 4
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+      - name: frontend
+        image: frontend:latest  # Ensure this matches your actual image name
+        ports:
+        - containerPort: 3000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql
+spec:
+  selector:
+    app: mysql
+  ports:
+    - protocol: TCP
+      port: 3306
+      targetPort: 3306
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend
+spec:
+  selector:
+    app: backend
+  ports:
+    - protocol: TCP
+      port: 8082
+      targetPort: 8082
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+spec:
+  selector:
+    app: frontend
+  ports:
+    - protocol: TCP
+      port: 3000
+      targetPort: 3000
+  type: LoadBalancer  # Expose frontend to external traffic

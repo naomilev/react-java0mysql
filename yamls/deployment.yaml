@@ -4,7 +4,7 @@ metadata:
   name: module3yan-app
   namespace: default
 spec:
-  replicas: 4
+  replicas: 3
   selector:
     matchLabels:
       app: module3yan
@@ -18,17 +18,22 @@ spec:
         image: public.ecr.aws/j8p9i7s1/module3yan:db-48
         ports:
         - containerPort: 3307
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          value: "db-57xsl"
         readinessProbe:
           tcpSocket:
             port: 3307
-          initialDelaySeconds: 5
+          initialDelaySeconds: 30
           periodSeconds: 10
       - name: back
         image: public.ecr.aws/j8p9i7s1/module3yan:back-48
         env:
-        - name: DB_HOST
-          value: localhost
-        - name: DB_PORT
-          value: "3307"
+        - name: SPRING_DATASOURCE_URL
+          value: "jdbc:mysql://localhost:3307/example"
+        - name: SPRING_DATASOURCE_USERNAME
+          value: "root"
+        - name: SPRING_DATASOURCE_PASSWORD
+          value: "db-57xsl"
       - name: front
         image: public.ecr.aws/j8p9i7s1/module3yan:front-48

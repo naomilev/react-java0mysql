@@ -13,16 +13,22 @@ spec:
       labels:
         app: module3yan
     spec:
-      initContainers:
-      - name: wait-for-db
-        image: busybox
-        command: ['sh', '-c', 'until nc -z db 3307; do echo waiting for db; sleep 2; done;']
       containers:
       - name: db
         image: public.ecr.aws/j8p9i7s1/module3yan:db-48
         ports:
         - containerPort: 3307
+        readinessProbe:
+          tcpSocket:
+            port: 3307
+          initialDelaySeconds: 5
+          periodSeconds: 10
       - name: back
         image: public.ecr.aws/j8p9i7s1/module3yan:back-48
+        env:
+        - name: DB_HOST
+          value: localhost
+        - name: DB_PORT
+          value: "3307"
       - name: front
         image: public.ecr.aws/j8p9i7s1/module3yan:front-48
